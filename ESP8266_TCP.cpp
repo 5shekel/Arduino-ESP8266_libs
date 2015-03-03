@@ -50,6 +50,19 @@ void ESP8266_TCP::begin(Stream *serial, int pinReset)
   //this->serialport.begin(serialport);
 }
 
+String ESP8266_TCP::rawCommandMultiLine(String command) {
+	debugPrintln("(ML) Executing: "+command);
+	write(command);
+	return readAllData(10000);
+}
+
+String ESP8266_TCP::rawCommand(String command) {
+	debugPrintln("Executing: "+command);
+	write(command);
+	debugPrintln(readData());
+	readData();
+}
+
 bool ESP8266_TCP::test() {
 	clearBuffer();
 	write("AT");
@@ -158,6 +171,23 @@ String ESP8266_TCP::waitingForJoin() {
 		delay(500);
 	}
 	return "0.0.0.0";
+}
+
+String ESP8266_TCP::getIpAddress() {
+	clearBuffer();
+	write("AT+CIFSR");
+	readData();
+	String data = readData();
+	return data;
+}
+
+bool ESP8266_TCP::isServerRunning() {
+	clearBuffer();
+	write("AT+CIPMUX?");
+	readData();
+	String data = readData();
+	debugPrintln("cipmux "+data);
+	return data == "+CIPMUX:1";
 }
 
 bool ESP8266_TCP::setMode(int mode) {
@@ -511,6 +541,16 @@ String ESP8266_TCP::readData() {
         }
     }
     return "";
+}
+
+String ESP8266_TCP::readAllData(unsigned long timeout) {
+    String data = "";
+    unsigned long t = millis();
+    while(available() > 0 && (millis() - t < timeout)) {
+    	char r = serial->read();
+    	data += r;
+    }
+    return data;
 }
 
 void ESP8266_TCP::write(String str) {

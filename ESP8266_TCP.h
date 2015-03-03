@@ -56,6 +56,11 @@ class ESP8266_TCP {
 	void begin(Stream *serial, int pinReset);
 
 
+	String rawCommand(String command);
+	String rawCommandMultiLine(String command);
+	String getIpAddress();
+	bool isServerRunning();
+
 	bool test();
 	void reset();
 	void hardReset();
@@ -122,6 +127,7 @@ class ESP8266_TCP {
 	String read();
 	String readData();
 	String readData(unsigned long timeout);
+	String readAllData(unsigned long timeout);
 	String readTCPData();
 
 	bool TCPConnected;
